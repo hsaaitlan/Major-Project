@@ -11,7 +11,7 @@ using System.Text;
 public class updateTexture : MonoBehaviour
 {
     private Renderer rend;
-    private int count = 0;
+    //private int count = 0;
     private static byte[] rcv;
     private bool cando = false;
     private static Texture2D tex;
@@ -21,11 +21,63 @@ public class updateTexture : MonoBehaviour
         rend = GetComponent<Renderer>();
         Thread thread = new Thread(StartServer);
         thread.Start();
+        
     }
 
     void StartServer()
     {
-        IPAddress ipAddress = IPAddress.Parse("192.168.1.102");
+        /*TcpListener listener = new TcpListener(IPAddress.Parse("192.168.1.108"), 12345);
+        listener.Start();*/
+        try
+        {
+            while (true)
+            {
+                TcpClient client = new TcpClient("192.168.1.108", 12345);
+                NetworkStream ns = client.GetStream();
+
+                byte[] r = new byte[16];
+                int s = ns.Read(r, 0, 16);
+                String leng = Encoding.ASCII.GetString(r);
+                int len = Convert.ToInt32(leng);
+                Debug.Log("Len: " + leng);
+                //rcv = new byte[len];
+                //int size = ns.Read(rcv, 0, len);    
+                rcv = ReadStream(ns, len);
+                if (rcv.Length == len)
+                    cando = true;
+                else
+                    Debug.Log("Incomplete Data");
+                Debug.Log("Received: " + rcv.Length);
+                ns.Flush();
+                client.Close();
+            }
+        }
+        catch (Exception ee)
+        {
+            Debug.LogError("Exception : " + ee);
+        }
+    }
+
+    byte[] ReadStream(NetworkStream ns, int len)
+    {
+        byte[] buffer = null;
+        buffer = new byte[len];
+        int byte_read = 0;
+        int byte_offset = 0;
+        while (byte_offset < len)
+        {
+            byte_read = ns.Read(buffer, byte_offset, len - byte_offset);
+            int prev = byte_offset;
+            byte_offset += byte_read;
+            if (prev >= byte_offset)
+                break;
+        }
+        return buffer;
+    }
+
+    /*void StartServer()
+    {
+        IPAddress ipAddress = IPAddress.Parse("192.168.1.108");
         Debug.Log(ipAddress.ToString());
         IPEndPoint remoteEP = new IPEndPoint(ipAddress, 12345);
 
@@ -48,16 +100,29 @@ public class updateTexture : MonoBehaviour
 
                 //Debug.Log(size);
                 int val = BitConverter.ToInt32(bytes, 0);
-                //Debug.Log(val);
+                cando = false;
+                Debug.Log(val);
                 //Debug.Log("Receiving Image Array");
                 rcv = new byte[val];
-                Receive(sender, rcv, 0, val, 10000);
-                cando = true;
+                //int rcvd = Receive(sender, rcv, 0, val, 10000);
+                int num = val / 10;
+                int rem = val % 10;
+                int rcvd = 0;
+                for (int i = 0; i < num; i++)
+                {
+                    rcvd += sender.Receive(rcv, i * 10, 10, SocketFlags.None);
+                }
+                rcvd += sender.Receive(rcv, num * 10, rem, SocketFlags.None);
+                Debug.Log("Received: " + rcvd);
+                if (rcvd == val)
+                    cando = true;
+                byte[] s = Encoding.ASCII.GetBytes(rcvd + "");
+                sender.Send(s);
                 //Debug.Log("Returned");
                 //tex.LoadImage(rcv);
                 //Debug.Log("Texture: " + tex.width);
                 //rend.material.SetTexture("_MainTex", tex);
-                /*try
+                *//*try
                 {
                     int dataSize = 0;
                     byte[] b = new byte[1024 * 10000];
@@ -75,12 +140,12 @@ public class updateTexture : MonoBehaviour
                 for (int i = val - 10; i < val + 30; i++)
                 {
                     Debug.Log(rcv[i] + " ");
-                }*/
+                }*//*
 
 
                 //Debug.Log("Size: "+ size + " Value " + val);
 
-                /*while (true)
+                *//*while (true)
                 {
                     bytes = new byte[1024];
                     int size = sender.Receive(bytes);
@@ -95,7 +160,7 @@ public class updateTexture : MonoBehaviour
                 String msg = "bd";
                 byte[] buffer = Encoding.ASCII.GetBytes(msg);
 
-                int sentSize = sender.Send(buffer);*/
+                int sentSize = sender.Send(buffer);*//*
                 sender.Close();
                 Debug.Log("Disconnected");
             }
@@ -104,16 +169,23 @@ public class updateTexture : MonoBehaviour
         {
             Debug.Log("Exception: " + e);
         }
-    }
+    }*/
 
     // Update is called once per frame
     void Update()
     {
         if (cando)
         {
-            rend.material.SetTexture("_MainTex", GetTexture(rcv));
             cando = false;
+            Debug.Log("Changing");
+            rend.material.SetTexture("_MainTex", GetTexture());
         }
+        /*if (startThrd)
+        {
+            startThrd = false;
+            Thread th = new Thread(StartServer);
+            th.Start();
+        }*/
         /*if (Input.GetMouseButtonDown(0))
         {
             if (count == 0) {
@@ -127,7 +199,7 @@ public class updateTexture : MonoBehaviour
         }*/
     }
 
-    public static void Receive(Socket socket, byte[] buffer, int offset, int size, int timeout)
+    /*public static int Receive(Socket socket, byte[] buffer, int offset, int size, int timeout)
     {
         //Debug.Log("Entered");
         int startTickCount = Environment.TickCount;
@@ -140,7 +212,11 @@ public class updateTexture : MonoBehaviour
             //Debug.Log("Try");
             try
             {
-                received += socket.Receive(buffer, offset + received, size - received, SocketFlags.None);
+                int rcvd = socket.Receive(buffer, offset + received, size - received, SocketFlags.None);
+                received += rcvd;
+                byte[] send = Encoding.ASCII.GetBytes("" + rcvd);
+                Debug.Log("Rcvd: " + rcvd);
+                int sent = socket.Send(send);
             }
             catch (SocketException ex)
             {
@@ -160,13 +236,16 @@ public class updateTexture : MonoBehaviour
             }
         } while (received < size);
         Debug.Log("Received: " + received);
-        /*for (int i = 0; i < 10; i++)
-            Debug.Log(buffer[i]);*/
-    }
+        return received;
+        *//*for (int i = 0; i < 10; i++)
+            Debug.Log(buffer[i]);*//*
+    }*/
 
-    public static Texture GetTexture(byte[] arr)
+    public static Texture2D GetTexture()
     {
-        tex = new Texture2D(2, 2);
+        if (rcv == null)
+            Debug.Log("Null Array");
+        tex = new Texture2D(1, 1);
         tex.LoadImage(rcv);
         return tex;
     }

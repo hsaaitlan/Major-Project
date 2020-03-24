@@ -6,6 +6,10 @@ TagManager:
   tags:
   - Right
   - Left
+  - SpaceScene
+  - SecondScene
+  - ThirdScene
+  - FourthScene
   layers:
   - Default
   - TransparentFX

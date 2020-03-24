@@ -100,6 +100,7 @@ public class GvrReticlePointer : GvrBasePointer
     public override void OnPointerEnter(RaycastResult raycastResultResult, bool isInteractive)
     {
         SetPointerTarget(raycastResultResult.worldPosition, isInteractive);
+        
     }
 
     /// <inheritdoc/>
@@ -175,7 +176,6 @@ public class GvrReticlePointer : GvrBasePointer
     protected override void Start()
     {
         base.Start();
-
         Renderer rendererComponent = GetComponent<Renderer>();
         rendererComponent.sortingOrder = reticleSortingOrder;
 
