@@ -12,6 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/VR.unity
     guid: 058b093265a723e46803a9b17747fdc9
   - enabled: 1
-    path: Assets/Scenes/Env2.unity
+    path: Assets/Scenes/Scene2.unity
     guid: 81b5bcaa8306f2349a45e02664cdef77
   m_configObjects: {}
