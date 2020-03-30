@@ -26,13 +26,13 @@ public class updateTexture : MonoBehaviour
 
     void StartServer()
     {
-        /*TcpListener listener = new TcpListener(IPAddress.Parse("192.168.1.108"), 12345);
+        /*TcpListener listener = new TcpListener(IPAddress.Parse("192.168.1.110"), 12345);
         listener.Start();*/
         try
         {
             while (true)
             {
-                TcpClient client = new TcpClient("192.168.1.109", 12345);
+                TcpClient client = new TcpClient("192.168.1.110", 12345);
                 NetworkStream ns = client.GetStream();
 
                 byte[] r = new byte[16];
